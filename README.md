@@ -12,30 +12,32 @@ The goal is to evaluate whether modern pretrained ECG encoders outperform interp
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```
 ├── data/                                 
 │   ├── metadata/                       # Raw metadata CSV files from MIMIC-IV-ECG
-│   ├── raw_waveforms/                  # Raw ecg waveforms downloaded from MIMIC
+│   ├── raw_waveforms/                  # Raw ecg waveforms downloaded from MIMIC-IV-ECG
 │   ├── processed/                      # Processed dataset saved as parquets
 │   └── figures/                        # Figures from exploratory data analysis
 │
 ├── notebooks/
-│   └── extract_data.ipynb              # Notebook for development of data extraction and label creation
+│   ├── extract_data.ipynb              # Notebook for development of data extraction and label creation
+│   └── extract_ecg_features.ipynb      # Finalized ecg processing pipeline
 │
 ├── utils/
 │   └── aria2_input.txt                 # aria2c input to download large amounts of ecg files from MIMIC-IV-ECG
 │
-├── src/
-│   └── build_mimic_ecg_metadata.py     # Finalized data extraction pipeline
+├── src/                                       
+│   ├── load_ecg.py                     # Helper module for loading ecg data                         
+│   ├── build_mimic_ecg_metadata.py     # Finalized data extraction pipeline
+│   └── build_ecg_feature_tables.py     # Finalized ecg processing pipeline
 │
 └── README.md
 ```
 
----
 
-# Dataset
+## Dataset
 
 This project uses the **MIMIC-IV-ECG Matched Subset**, which contains:
 
@@ -46,9 +48,8 @@ This project uses the **MIMIC-IV-ECG Matched Subset**, which contains:
 
 Access to the dataset requires credentialed access through **PhysioNet**.
 
----
 
-# Label Construction
+## Label Construction
 
 ECG labels are derived from the machine interpretation text provided in the MIMIC-IV-ECG metadata.
 
@@ -62,23 +63,21 @@ Three mutually exclusive cohorts are defined:
 
 Ambiguous ECGs (e.g., borderline findings or nonspecific abnormalities) are excluded from classification tasks.
 
----
 
-# Classification Tasks
+## Classification Tasks
 
 Two binary classification tasks are constructed.
 
-## Task 1: Atrial Fibrillation Detection
+### Task 1: Atrial Fibrillation Detection
 
 Atrial Fibrillation vs Normal ECG reports
 
-## Task 2: Abnormal ECG Detection
+### Task 2: Abnormal ECG Detection
 
 Abnormal vs Normal ECG reports
 
----
 
-# Subset Construction
+## Subset Construction
 
 Downloading and processing the entire MIMIC-IV-ECG dataset is computationally expensive.  
 To make experiments tractable, a balanced subset of ECG recordings is constructed.
@@ -105,9 +104,8 @@ Normal vs Abnormal dataset
 - 5,000 Normal  
 - 5,000 Abnormal  
 
----
 
-# Metadata Generation Script
+## Metadata Generation Script
 
 The script `src/build_mimic_ecg_metadata.py` constructs all metadata tables used in the project.
 
@@ -120,9 +118,8 @@ The script `src/build_mimic_ecg_metadata.py` constructs all metadata tables used
 7. Sample the balanced subset
 8. Generate a waveform download manifest for aria2
 
----
 
-# Running the Metadata Pipeline
+## Running the Metadata Pipeline
 
 From the project root directory:
 
@@ -143,9 +140,8 @@ Example:
 python src/build_mimic_ecg_metadata.py --make-plots --write-aria2
 ```
 
----
 
-# Output Files
+## Output Files
 
 The script generates the following metadata files:
 
@@ -159,9 +155,8 @@ data/processed/norm_task_subset.parquet
 
 These tables contain the ECG metadata, labels, and waveform paths used for downstream analysis.
 
----
 
-# Downloading ECG Waveforms
+## Downloading ECG Waveforms
 
 Waveforms can be downloaded using the generated `aria2_input.txt` file.
 

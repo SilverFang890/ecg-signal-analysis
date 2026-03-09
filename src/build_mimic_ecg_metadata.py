@@ -295,30 +295,25 @@ def main() -> None:
 
     # Save canonical outputs
     save_parquet(meta, args.processed_dir / "meta_labels.parquet")
-    save_parquet(afib, args.processed_dir / "afib_task_metadata.parquet")
-    save_parquet(norm, args.processed_dir / "norm_task_metadata.parquet")
-    save_parquet(afib_sub, args.processed_dir / "afib_task_subset_metadata.parquet")
-    save_parquet(norm_sub, args.processed_dir / "norm_task_subset_metadata.parquet")
+    save_parquet(afib, args.processed_dir / "afib_metadata.parquet")
+    save_parquet(norm, args.processed_dir / "norm_metadata.parquet")
+    save_parquet(afib_sub, args.processed_dir / "afib_subset_metadata.parquet")
+    save_parquet(norm_sub, args.processed_dir / "norm_subset_metadata.parquet")
 
     if args.make_plots:
         make_cohort_pie(meta, args.figures_dir / "ecg_cohort_pie.png")
 
     needed_paths = set(afib_sub["path"]).union(set(norm_sub["path"]))
-    pd.Series(sorted(needed_paths), name="path").to_csv(
-        args.processed_dir / "needed_paths_subset.csv", index=False
-    )
-
     if args.write_aria2:
         write_aria2_input(needed_paths, args.aria2_file, args.waveform_root)
 
     # Console summary
     print("Saved:")
     print(f"  META:         {args.processed_dir / 'meta_labels.parquet'}")
-    print(f"  AF full:      {args.processed_dir / 'afib_task_metadata.parquet'}")
-    print(f"  Norm full:    {args.processed_dir / 'norm_task_metadata.parquet'}")
-    print(f"  AF subset:    {args.processed_dir / 'afib_task_subset_metadata.parquet'}")
-    print(f"  Norm subset:  {args.processed_dir / 'norm_task_subset_metadata.parquet'}")
-    print(f"  Needed paths: {args.processed_dir / 'needed_paths_subset.csv'}")
+    print(f"  AF full:      {args.processed_dir / 'afib_metadata.parquet'}")
+    print(f"  Norm full:    {args.processed_dir / 'norm_metadata.parquet'}")
+    print(f"  AF subset:    {args.processed_dir / 'afib_subset_metadata.parquet'}")
+    print(f"  Norm subset:  {args.processed_dir / 'norm_subset_metadata.parquet'}")
     print()
     print("Counts:")
     print(meta[["is_af", "is_normal_strict", "is_clearly_abnormal"]].sum())
