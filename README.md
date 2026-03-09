@@ -105,26 +105,17 @@ Normal vs Abnormal dataset
 - 5,000 Abnormal  
 
 
-## Metadata Generation Script
+## Quick Start
 
-The script `src/build_mimic_ecg_metadata.py` constructs all metadata tables used in the project.
-
-1. Load MIMIC-IV-ECG metadata files
-2. Combine machine interpretation fields into a single report
-3. Parse ECG labels using regex keyword matching
-4. Construct the master metadata table (`META`)
-5. Verify that cohorts are mutually exclusive
-6. Build task specific datasets
-7. Sample the balanced subset
-8. Generate a waveform download manifest for aria2
+This section describes the minimal steps required to reproduce the dataset and feature tables used in this project.
 
 
-## Running the Metadata Pipeline
+### 1. Generate Metadata Tables
 
-From the project root directory:
+From the project root:
 
-```
-python src/build_mimic_ecg_metadata.py
+```bash
+python src/build_mimic_ecg_metadata.py --make-plots --write-aria2
 ```
 
 Optional flags:
@@ -134,40 +125,89 @@ Optional flags:
 --write-aria2     Generate waveform download manifest
 ```
 
-Example:
+This script:
+
+- loads MIMIC-IV-ECG metadata files  
+- constructs ECG interpretation reports  
+- parses ECG labels  
+- creates classification cohorts  
+- samples the balanced subset used for experiments  
+- generates an ECG waveform download manifest
+
+Output metadata tables are written to:
 
 ```
-python src/build_mimic_ecg_metadata.py --make-plots --write-aria2
+data/processed/
 ```
 
 
-## Output Files
+### 2. Download ECG Waveforms
 
-The script generates the following metadata files:
-
-```
-data/processed/meta_labels.parquet
-data/processed/af_task_metadata.parquet
-data/processed/norm_task_metadata.parquet
-data/processed/af_task_subset.parquet
-data/processed/norm_task_subset.parquet
-```
-
-These tables contain the ECG metadata, labels, and waveform paths used for downstream analysis.
-
-
-## Downloading ECG Waveforms
-
-Waveforms can be downloaded using the generated `aria2_input.txt` file.
+Waveforms are downloaded using the generated `aria2_input.txt`.
 
 Example command:
 
-```
-aria2c -i aria2_input.txt   -j 32   --enable-http-pipelining=true   --min-split-size=1M   --continue=true   --auto-file-renaming=false
+```bash
+aria2c -i utils/aria2_input.txt \
+-j 32 \
+--enable-http-pipelining=true \
+--min-split-size=1M \
+--continue=true \
+--auto-file-renaming=false
 ```
 
-Downloaded ECG waveforms should be stored in:
+Downloaded waveform files should be stored in:
 
 ```
 data/raw_waveforms/
 ```
+
+
+### 3. Build ECG Feature Tables
+
+Once waveform files are downloaded, run the ECG processing pipeline:
+
+```bash
+python src/build_ecg_feature_tables.py
+```
+
+This pipeline:
+
+- loads waveform files  
+- performs signal validation  
+- computes ECG signal processing features  
+- builds feature tables for downstream modeling
+
+Outputs are saved to:
+
+```
+data/processed/
+```
+
+
+## Pipeline Summary
+
+The full pipeline consists of three stages:
+
+1. **Metadata Construction**  
+   `build_mimic_ecg_metadata.py`
+
+2. **Waveform Download**  
+   `aria2_input.txt → data/raw_waveforms/`
+
+3. **Feature Extraction**  
+   `build_ecg_feature_tables.py`
+
+---
+
+### Output Artifacts
+
+| Output | Description |
+|------|-------------|
+| `meta_labels.parquet` | Master ECG metadata table |
+| `afib_metadata.parquet` | AF vs Normal metadata |
+| `afib_subset_metadata.parquet` | AF vs Norm subset metadata |
+| `afib_subset_features.parquet` | AF vs Norm processing features |
+| `norm_metadata.parquet` | Abnormal vs Normal metadata |
+| `norm_subset_metadata.parquet` | Abn vs Norm subset metadata |
+| `norm_subset_features.parquet` | Abn vs Norm processing features |
