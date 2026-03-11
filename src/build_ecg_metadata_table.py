@@ -265,7 +265,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--aria2-file",
         type=Path,
-        default=Path("../utils/aria2_input.txt"),
+        default=Path("../config/aria2_input.txt"),
         help="Output path for aria2 input file.",
     )
     return parser.parse_args()

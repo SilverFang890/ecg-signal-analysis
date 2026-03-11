@@ -337,7 +337,7 @@ def save_invalid_ecg_figures(features_df: pd.DataFrame, out_dir: Path) -> pd.Dat
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build handcrafted ECG feature tables.")
+    parser = argparse.ArgumentParser(description="Build ECG signal processing feature tables.")
     parser.add_argument("--afib-input", default="../data/processed/afib_subset_metadata.parquet")
     parser.add_argument("--norm-input", default="../data/processed/norm_subset_metadata.parquet")
     parser.add_argument("--afib-output", default="../data/processed/afib_subset_features.parquet")
